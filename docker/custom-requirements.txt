@@ -1,0 +1,4 @@
+gym
+gym-retro
+wandb
+tensorboardX

@@ -1,0 +1,45 @@
+{
+  "info": {
+    "door": {
+      "address": 1025,
+      "type": ">u2"
+    },
+    "face": {
+      "address": 1557,
+      "type": "|i1"
+    },
+    "level": {
+      "address": 15,
+      "type": "|u2"
+    },
+    "between_levels": {
+      "address": 1759,
+      "type": "|i1"
+    },
+    "lives": {
+      "address": 1743,
+      "type": "|u1"
+    },
+    "room": {
+      "address": 1246,
+      "type": "|u1"
+    },
+    "screen": {
+      "address": 1245,
+      "type": "|u2"
+    },
+    "sword": {
+      "address": 1774,
+      "type": "|u1"
+    },
+    "x": {
+      "address": 1243,
+      "type": "|u2"
+    },
+    "y": {
+      "address": 1774,
+      "mask": 224,
+      "type": ">u4"
+    }
+  }
+}

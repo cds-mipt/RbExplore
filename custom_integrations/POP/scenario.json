@@ -1,0 +1,24 @@
+{
+  "done": {
+    "condition": "any",
+    "variables": {
+      "lives": {
+        "op": "less-or-equal",
+        "reference": 0
+      },
+      "between_levels": {
+        "op": "equal",
+        "reference": 19
+      }
+    }
+  },
+  "reward": {
+    "script": "lua:correct_score"
+  },
+  "scripts": [
+    "script.lua"
+  ],
+  "actions": [
+    [[], ["LEFT"], ["RIGHT"], ["UP"], ["DOWN"],  ["A"], ["B"], ["A", "LEFT"], ["A", "RIGHT"], ["A", "UP"], ["A", "DOWN"]]
+  ]
+}

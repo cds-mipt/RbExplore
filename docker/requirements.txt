@@ -1,0 +1,12 @@
+gym[Atari]
+Pillow
+imageio
+matplotlib
+loky
+joblib
+dataclasses
+opencv-python
+cloudpickle
+fire
+pandas
+filelock
