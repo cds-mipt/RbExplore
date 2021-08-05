@@ -9,6 +9,7 @@ docker build --build-arg UNAME=$(id -un) --build-arg UID=$(id -u) --build-arg GI
 ## 2 Run experiment
 ```sh
 cd $HOME/experiments/rbexplore
+# Need to copy rom.nes into custom_integrations/POP/
 docker run --ipc=host --gpus "device=2" --rm --name pop_level-01_sword-start_run-0 -w /tmp/shared/ -u $(id -u):$(id -g) -v $HOME/experiments/pop/rbexplore:/tmp/shared -d $(id -un)/rbexplore:latest ./start.sh
 ```
 ## 3 Draw schema
