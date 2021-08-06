@@ -1,20 +1,20 @@
 {
   "info": {
-    "door": {
-      "address": 1025,
-      "type": ">u2"
-    },
     "face": {
       "address": 1557,
       "type": "|i1"
     },
     "level": {
-      "address": 15,
-      "type": "|u2"
+      "address": 112,
+      "type": "|u1"
     },
-    "between_levels": {
+    "pass_through_exit_door": {
       "address": 1759,
-      "type": "|i1"
+      "type": "|u1"
+    },
+    "open_exit_door": {
+      "address": 1783,
+      "type": "|u1"
     },
     "lives": {
       "address": 1743,
@@ -23,10 +23,6 @@
     "room": {
       "address": 1246,
       "type": "|u1"
-    },
-    "screen": {
-      "address": 1245,
-      "type": "|u2"
     },
     "sword": {
       "address": 1774,
@@ -40,6 +36,14 @@
       "address": 1774,
       "mask": 224,
       "type": ">u4"
+    },
+    "minutes_units_ascii": {
+      "address": 1222,
+      "type": "|u1"
+    },
+    "minutes_tens_ascii": {
+      "address": 1221,
+      "type": "|u1"
     }
   }
 }

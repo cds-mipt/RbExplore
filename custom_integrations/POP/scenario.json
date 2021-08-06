@@ -3,12 +3,12 @@
     "condition": "any",
     "variables": {
       "lives": {
-        "op": "less-or-equal",
-        "reference": 0
+        "measurement": "absolute",
+        "op": "zero"
       },
-      "between_levels": {
-        "op": "equal",
-        "reference": 19
+      "level": {
+        "measurement": "delta",
+        "op": "nonzero"
       }
     }
   },
