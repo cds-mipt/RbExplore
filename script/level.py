@@ -19,8 +19,6 @@ class Level:
 
         self._room2row_column = room2row_column
 
-        for room in self._room2row_column.keys():
-            assert room in self._allowed_ranges, f'Room:{room}'
         for room in self._allowed_ranges.keys():
             assert room in self._room2row_column, f'Room:{room}'
 
