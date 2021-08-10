@@ -1,0 +1,10 @@
+{
+    "level": 13,
+    "structure": [
+        [null, 2, 0, 16, 9],
+        [23, 3, 15, 22, 12],
+        [null, null, 10, null, 1]
+    ],
+    "allowed_ranges": [
+    ]
+}

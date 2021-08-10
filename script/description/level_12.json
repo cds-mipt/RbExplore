@@ -1,0 +1,14 @@
+{
+    "level": 12,
+    "structure": [
+        [null, 15, 9, 21, 4, null],
+        [22, 12, 1, 14, 19, null],
+        [null, 10, 20, 17, 18, null],
+        [null, 16, null, 5, 11, 13],
+        [null, null, null, 6, 7, 23],
+        [null, null, null, 0, 8, null],
+        [null, null, null, 2, 3, null]
+    ],
+    "allowed_ranges": [
+    ]
+}
