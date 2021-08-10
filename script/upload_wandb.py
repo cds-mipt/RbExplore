@@ -31,10 +31,10 @@ def compute_coverage(rooms_data, level: Level, discretization_step):
     return len(coverage)
 
 
-def read_run_data(path, level: Level, discretization_step, max_coverage):
+def read_run_data(glob_path, level: Level, discretization_step, max_coverage):
     steps = []
     coverage = []
-    file_paths = sorted(glob.glob(path))
+    file_paths = sorted(glob.glob(glob_path))
     print(f'Found {len(file_paths)} files')
     for file_path in file_paths:
         rooms_data = read_rooms_data(file_path)
@@ -59,12 +59,12 @@ def interpolate(x, y, start, end, interval):
     return np.asarray(x_interpolate), np.asarray(y_interpolate)
 
 
-# Usage: python3 script/upload_wandb.py --level_description_path script/description/level_01.json --level_ref_coverage_path script/ref_coverage/rooms_data_01.json --data_path script/example/rooms_data*json --project_name test-project --run_name run-0 --discretization_step 32
+# Usage: python3 script/upload_wandb.py --level_description_path script/description/level_01.json --level_ref_coverage_path script/ref_coverage/rooms_data_01.json --data_glob_path 'script/example/rooms_data*json' --project_name test-project --run_name run-0 --discretization_step 32
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--level_description_path', type=str, required=True)
     parser.add_argument('--level_ref_coverage_path', type=str, required=True)
-    parser.add_argument('--data_path', type=str, required=True)
+    parser.add_argument('--data_glob_path', type=str, required=True)
     parser.add_argument('--project_name', type=str, required=True)
     parser.add_argument('--run_name', type=str, required=True)
     parser.add_argument('--discretization_step', type=int, default=1)
@@ -91,7 +91,7 @@ def main():
         read_rooms_data(args.level_ref_coverage_path), level, args.discretization_step
     )
 
-    steps, coverage = read_run_data(args.data_path, level, args.discretization_step, ref_coverage)
+    steps, coverage = read_run_data(args.data_glob_path, level, args.discretization_step, ref_coverage)
     if args.interpolate:
         steps, coverage = interpolate(
             steps, coverage, start=args.start_steps, end=args.max_steps, interval=args.interval_steps
