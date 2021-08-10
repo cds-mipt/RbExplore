@@ -44,6 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--result_path', type=str, required=True)
     parser.add_argument('--color', nargs=3, type=int, default=[255, 255, 255])
     parser.add_argument('--radius', type=int, default=7)
+    parser.add_argument('--no-filter', dest='filter', default=True, action='store_false')
     data_type2parser = {'graph_data': read_graph_data, 'rooms_data': read_rooms_data}
 
     args = parser.parse_args()
@@ -61,7 +62,9 @@ if __name__ == '__main__':
     input_data = data_type2parser[args.data_type](args.data_path)
     level_image = cv2.cvtColor(cv2.imread(args.level_image_path), cv2.COLOR_BGR2RGB)
 
-    valid_positions = [element['position'] for element in input_data if level.is_valid_position(element['position'])]
+    valid_positions = [
+        element['position'] for element in input_data if not args.filter or level.is_valid_position(element['position'])
+    ]
     level_image = draw(level_image, valid_positions, level, color=tuple(args.color), radius=args.radius)
 
     cv2.imwrite(args.result_path, cv2.cvtColor(level_image, cv2.COLOR_BGR2RGB))
