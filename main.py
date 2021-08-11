@@ -162,13 +162,14 @@ if __name__ == '__main__':
     sptm_batch_size = int(default_config['SPTMBatchSize'])
     n_prefixes = int(default_config['NPrefixes'])
     depth_limit = int(default_config['DepthLimit'])
+    restrict_level = default_config.getboolean('RestrictLevel')
 
     os.makedirs(base_path)
     sys.stdout = open(os.path.join(base_path, 'log.out'), 'w')
     sys.stderr = open(os.path.join(base_path, 'log.err'), 'w')
     retro.data.Integrations.add_custom_path(custom_integrations_path)
 
-    env, feature_extractors = envs.make(env_id)
+    env, feature_extractors = envs.make(env_id, restrict_level)
     init_observation = env.reset()
     init_observation = np.float32(cv2.resize(cv2.cvtColor(init_observation, cv2.COLOR_RGB2GRAY), (96, 96)))[np.newaxis] / 255.
     init_cluster = explore.Cluster(state=env.get_state(), trajectory_length=0)
@@ -199,7 +200,7 @@ if __name__ == '__main__':
     )
 
     explorer = explore.Explorer(
-        env_maker=lambda: envs.make(env_id)[0],
+        env_maker=lambda: envs.make(env_id, restrict_level)[0],
         explore_steps=explore_steps,
         n_workers=n_workers,
         r_network_trainer=r_network_trainer,

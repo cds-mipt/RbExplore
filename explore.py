@@ -117,7 +117,6 @@ class ExplorationWorker(Process):
                 lives = self.env.extract('lives')
                 s, reward, done, info = self.env.step(action)
                 steps += 1
-                visited_rooms[self.env.extract('room')].add((self.env.extract('x'), self.env.extract('y')))
                 cluster = Cluster(state=self.env.get_state(), trajectory_length=start_cluster.trajectory_length + steps)
                 observation = cluster.state.observation
                 if not self.ignore_black or observation.max() != 0:
@@ -146,9 +145,15 @@ class ExplorationWorker(Process):
                     log_reward=log_reward
                 ))
 
-            for _ in range(self.steps_after_done):
-                self.env.step(0)
-                visited_rooms[self.env.extract('room')].add((self.env.extract('x'), self.env.extract('y')))
+                if not done:
+                    visited_rooms[self.env.extract('room')].add((self.env.extract('x'), self.env.extract('y')))
+                else:
+                    for _ in range(self.steps_after_done + 1):
+                        if info.get('RestrictLevelWrapper.level_changed', False):
+                            break
+
+                        visited_rooms[self.env.extract('room')].add((self.env.extract('x'), self.env.extract('y')))
+                        _, _, _, info = self.env.step(0)
 
             images1, images2, labels = sptm.create_training_data(observations)
             n_frames_compute = steps

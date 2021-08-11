@@ -17,41 +17,55 @@ class RollbackWrapper(gym.Wrapper):
         self._ram = None
         self._observation = None
 
-    def get_emulator_state(self):
-        return self._emulator_state
+    @abstractmethod
+    def get_emulator_state(self, cache=True):
+        raise NotImplementedError
 
-    def get_ram(self):
-        return self._ram
+    @abstractmethod
+    def get_ram(self, cache=True):
+        raise NotImplementedError
 
     def get_observation(self):
         return self._observation
 
-    def get_state(self):
-        return State(self.get_emulator_state(), self.get_ram(), self.get_observation())
+    def get_state(self, cache=True):
+        return State(self.get_emulator_state(cache), self.get_ram(cache), self.get_observation())
 
     @abstractmethod
     def set_state(self, state: State):
         raise NotImplementedError
 
     @abstractmethod
-    def _update_state(self, observation):
+    def _update_cache(self, observation):
         raise NotImplementedError
 
     def reset(self, **kwargs):
         observation = self.env.reset()
-        self._update_state(observation)
+        self._update_cache(observation)
 
         return observation
 
     def step(self, action):
         observation, reward, done, info = self.env.step(action)
-        self._update_state(observation)
+        self._update_cache(observation)
 
         return observation, reward, done, info
 
 
 class RetroRollbackWrapperImpl(RollbackWrapper):
-    def _update_state(self, observation):
+    def get_emulator_state(self, cache=True):
+        if cache:
+            return self._emulator_state
+
+        return self.unwrapped.em.get_state()
+
+    def get_ram(self, cache=True):
+        if cache:
+            return self._ram
+
+        return self.unwrapped.get_ram()
+
+    def _update_cache(self, observation):
         self._observation = observation
         self._ram = self.unwrapped.get_ram()
         self._emulator_state = self.unwrapped.em.get_state()
@@ -62,7 +76,19 @@ class RetroRollbackWrapperImpl(RollbackWrapper):
 
 
 class AtariRollbackWrapperImpl(RollbackWrapper):
-    def _update_state(self, observation):
+    def get_emulator_state(self, cache=True):
+        if cache:
+            return self._emulator_state
+
+        return self.unwrapped.clone_full_state()
+
+    def get_ram(self, cache=True):
+        if cache:
+            return self._ram
+
+        return self.unwrapped.ale.getRAM()
+
+    def _update_cache(self, observation):
         self._observation = observation
         self._ram = self.unwrapped.ale.getRAM()
         self._emulator_state = self.unwrapped.clone_full_state()
@@ -80,14 +106,19 @@ def _get_mask(mask, length):
 
 
 class RamFeatureExtractor:
-    def __init__(self, index, length=1, mask=None):
+    def __init__(self, index, length=1, mask=None, convert=None):
         super().__init__()
         self._index = index
         self._length = length
         self._mask = _get_mask(mask, length)
+        self._convert = convert
 
     def extract(self, ram):
-        return int.from_bytes(ram[self._index:self._index + self._length].tobytes(), byteorder='little') & self._mask
+        value = int.from_bytes(ram[self._index:self._index + self._length].tobytes(), byteorder='little') & self._mask
+        if self._convert is not None:
+            return self._convert(value)
+
+        return value
 
 
 class RamFeaturesWrapper(gym.Wrapper):
@@ -125,6 +156,24 @@ class EnsureMinutesLeftWrapper(gym.Wrapper):
         return observation, reward, done, info
 
 
+class RestrictLevelWrapper(gym.Wrapper):
+    def __init__(self, env: RamFeaturesWrapper):
+        super().__init__(env)
+
+    def _get_level(self):
+        return self.env.extract('level')
+
+    def step(self, action):
+        before_level = self._get_level()
+        observation, reward, done, info = self.env.step(action)
+        after_level = self._get_level()
+        if after_level != before_level:
+            done = True
+            info['RestrictLevelWrapper.level_changed'] = True
+
+        return observation, reward, done, info
+
+
 class MaxAndSkipEnv(gym.Wrapper):
     def __init__(self, env, skip=4):
         """Return only every `skip`-th frame"""
@@ -156,7 +205,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         return self.env.reset(**kwargs)
 
 
-def make_pop(game, state):
+def make_pop(game, state, restrict_level):
     env = retro.make(
         game,
         inttype=retro.data.Integrations.ALL,
@@ -169,10 +218,14 @@ def make_pop(game, state):
         'lives': RamFeatureExtractor(index=1743),
         'room': RamFeatureExtractor(index=1246),
         'x': RamFeatureExtractor(index=1243, length=2),
-        'y': RamFeatureExtractor(index=1777, mask=224)
+        'y': RamFeatureExtractor(index=1777, mask=224),
+        'level': RamFeatureExtractor(index=112, convert=lambda x: x + 1)
     }
     env = RamFeaturesWrapper(env)
     env.add_feature_extractors(feature_extractors)
+    if restrict_level:
+        env = RestrictLevelWrapper(env)
+
     env = EnsureMinutesLeftWrapper(env)
     env = MaxAndSkipEnv(env)
 
@@ -195,10 +248,10 @@ def make_montezuma(env_id):
     return env, copy.deepcopy(feature_extractors)
 
 
-def make(env_id):
+def make(env_id, restrict_level):
     if env_id.startswith('POP'):
         game, state = env_id.split(':')
-        return make_pop(game, state)
+        return make_pop(game, state, restrict_level)
     elif env_id.startswith('MontezumaRevenge'):
         return make_montezuma(env_id)
     else:
