@@ -23,7 +23,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     merge_rooms_data = collections.defaultdict(set)
-    for path in glob.glob(args.data_glob_path):
+    paths = glob.glob(args.data_glob_path)
+    print('Files to combine:', sorted(paths))
+    for path in paths:
         for room, coordinates in read_rooms_data(path)['rooms'].items():
             merge_rooms_data[room] |= coordinates
 
