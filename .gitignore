@@ -50,3 +50,6 @@ Thumbs.db
 
 # Temporary files:
 tmp/
+
+# Wandb files
+wandb/
